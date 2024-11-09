@@ -6,6 +6,7 @@ import org.javabin.entity.Book;
 import org.javabin.entity.TreeNode;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -18,7 +19,7 @@ public class JavaHandsOn {
         List<String> list = Arrays.asList("a", "b", "c", "d", "e");
         int[] arr = {1, 2, 4, 7, 1, 3, 5, 2, 13, 22, 21, 4};
         int[] arr2 = {1, 3, 5, 3, 67, 56, 23, 41};
-        int[] arr3 = {1, 10, -6, 8, 9, 12, -20, 18, 15, -7};
+        int[] arr3 = {1, 10, -6, 8, 9, 12, -20, 28, 15, 17};
 
         List<Integer> integerList = Arrays.stream(arr).boxed().toList();
         List<Integer> integerList2 = Arrays.stream(arr2).boxed().toList();
@@ -29,7 +30,7 @@ public class JavaHandsOn {
         Integer[] arrInteger = Arrays.stream(arr).boxed().toArray(Integer[]::new);
         List<Integer> intList = Arrays.stream(arr).boxed().toList();
         //------------------//
-        int[] arrInt = Arrays.stream(arrInteger).mapToInt(Integer::valueOf).toArray();
+        int[] arrInt = Arrays.stream(arrInteger).mapToInt(Integer::intValue).toArray();
         intList = Arrays.stream(arrInteger).toList();
         intList = Arrays.asList(arrInteger);
         //------------------//
@@ -55,6 +56,16 @@ public class JavaHandsOn {
                 new Book("7", "book3", 10, "author3"),
         };
         List<Book> bookList = Arrays.stream(bookArray).toList();
+
+        long currentTimeMillis = System.currentTimeMillis();
+        Date date = new Date(currentTimeMillis);
+        System.out.println("Current Date and Time: " + date);
+        long timeMillis = date.getTime();
+        long days = TimeUnit.MILLISECONDS.toDays(date.getTime());
+        long hours = TimeUnit.MILLISECONDS.toHours(timeMillis);
+        System.out.println("days = " + days);
+        System.out.println("hours = " + hours);
+
 
         //reverseArray(arr);
         //reverseArrayWithScope(arr, 4, 10);
@@ -142,8 +153,18 @@ public class JavaHandsOn {
             }
         });*/
 
-        int[] indices = findMaxSumOfSubArray(arr3);
-        System.out.println("The max sum of the array is observed between " + indices[0] + " and " + indices[1]);
+        /*int maxSum = findMaxSumOfSubArray(arr3);
+        System.out.println("maxSum = " + maxSum);*/
+
+        /*int secondLargestNum = findSecondLargestNum(arr2);
+        System.out.println("secondLargestNum = " + secondLargestNum);*/
+
+        Arrays.stream(arrInteger).forEach(i -> System.out.print(i + "\t"));
+        System.out.println();
+        shuffleArray(arrInteger);
+        shuffleArray(arrInteger);
+        shuffleArray(arrInteger);
+        Arrays.stream(arrInteger).forEach(i -> System.out.print(i + "\t"));
     }
 
     /**
@@ -240,7 +261,7 @@ public class JavaHandsOn {
     }
 
     /**
-     * Write a program to reverse a list.
+     * Reverse a list.
      */
     private static void reverseList(List<String> list) {
         System.out.println("list = " + list);
@@ -524,9 +545,9 @@ public class JavaHandsOn {
         Object obj2 = new Object();
         Object obj3 = new Object();
 
-        Thread t1 = new Thread(new SyncThread(obj1, obj2), "t1");
-        Thread t2 = new Thread(new SyncThread(obj2, obj3), "t2");
-        Thread t3 = new Thread(new SyncThread(obj3, obj1), "t3");
+        Thread t1 = new Thread(new SyncRunner(obj1, obj2), "t1");
+        Thread t2 = new Thread(new SyncRunner(obj2, obj3), "t2");
+        Thread t3 = new Thread(new SyncRunner(obj3, obj1), "t3");
 
         t1.start();
         Thread.sleep(5000);
@@ -535,11 +556,11 @@ public class JavaHandsOn {
         t3.start();
     }
 
-    private static class SyncThread implements Runnable {
+    private static class SyncRunner implements Runnable {
         private Object obj1;
         private Object obj2;
 
-        public SyncThread(Object o1, Object o2) {
+        public SyncRunner(Object o1, Object o2) {
             this.obj1 = o1;
             this.obj2 = o2;
         }
@@ -888,28 +909,64 @@ public class JavaHandsOn {
     /**
      * Find the maximum sum of the sub array in an array.
      */
-    private static int[] findMaxSumOfSubArray(int[] arr) {
+    private static int findMaxSumOfSubArray(int[] arr) {
         int maxSum = arr[0];
         int currMaxSum = arr[0];
-        int[] subArrIndex = new int[2];
-        subArrIndex[0] = -1;
         for (int i = 1, n = arr.length; i < n; i++) {
             if(currMaxSum <= currMaxSum + arr[i]){
                 currMaxSum = currMaxSum + arr[i];
                 if(maxSum < currMaxSum) {
                     maxSum = currMaxSum;
-                    if(subArrIndex[0] == -1) {
-                        subArrIndex[0] = i;
-                    }
-                    subArrIndex[1] = i;
                 }
             } else {
                 currMaxSum = 0;
-                subArrIndex[0] = -1;
             }
         }
-        System.out.println("maxSum = " + maxSum);
-        return subArrIndex;
+        return maxSum;
+    }
+
+    /**
+     * Find the second largest number in an array.
+     */
+    private static int findSecondLargestNum(int[] arr) {
+        int max = arr[0];
+        int secondMax = arr[0];
+        /*int iMax = 0;
+        int iSecondMax = 0;
+        for (int i = 1, n = arr.length; i < n; i++) {
+            if(max < arr[i]) {
+                max = arr[i];
+                iMax = i;
+            }
+        }
+        for (int i = 1, n = arr.length; i < n; i++) {
+            if(secondMax < arr[i] && iMax != i) {
+                secondMax = arr[i];
+            }
+        }*/
+        for (int i : arr) {
+            if(i > max) {
+                secondMax = max;
+                max = i;
+            } else if(i > secondMax) {
+                secondMax = i;
+            }
+        }
+
+        return secondMax;
+    }
+
+    /**
+     * Shuffle an array
+     */
+    private static<T> void shuffleArray(T[] arr) {
+        Random random = new Random();
+        for (int i = 0, n = arr.length; i < n; i++) {
+            int index = random.nextInt(n);
+            T tmp = arr[i];
+            arr[i] = arr[index];
+            arr[index] = tmp;
+        }
     }
 }
 
